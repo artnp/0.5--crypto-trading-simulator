@@ -1,0 +1,155 @@
+<html>
+<head><meta charset="utf-8">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+<link rel="stylesheet" href="index.css">
+</head>
+<script src="jquery.min.js"></script>
+<body style="background-color:#1A1C1D;">
+<center>
+<h5><div id="wallet1"></div></h5>
+  <table>
+<td id="colorTD"><h3><div id="realprofit"></div></h3></td>
+<td><table border="1"><thead>
+	  <tr style="background-color: #5A5050">
+    <th><center><input id="NameCoin" style="font-size:14pt;height:20px;width:60px;" autocomplete="off" placeholder="เหรียญ" onClick="this.select();">
+    </center></th>	
+    <th><center><font size="1">เหรียญ</font></center></th>	
+    <th><center><font size="1">ราคาตอนนี้</font></center></th>		
+    <th><center><font size="1"><div id="percentWhat"></div></font></center></th>		
+		<th><center><font size="1">ซื้อที่ราคา</font></center></th>		
+		<th><center><font size="1">จำนวนเหรียญ</font></center></th>
+		<th><center><font size="1">ใช้เงินซื้อไป</font></center></th>
+	  </tr></thead><tbody>
+	   <tr style="background-color: #1D1D1D">
+     <td><center><button type="submit" id="save" style="font-size:13pt;height:24px;" onclick="cryptoSave()">เลือก</button> </center></td>
+     <td><center><font color="grey"><u><div id='symbol' style='user-select: all; cursor: pointer;'></div></u></font></center></td>	
+     <td><center><div id="pricenow"></div></center></td>
+     <th><center><div id="percent"></div></center></th>		
+		 <td><center><font color="grey"><u><div id='average' style='user-select: all; cursor: pointer;'></div></u></font></center></td>		 
+		 <td><center><font color="#4d7a41"><u><div id='executed' style='user-select: all; cursor: pointer;'></div></u></font></center></td>
+		 <td><center><font color="grey"><u><div id='total' style='user-select: all; cursor: pointer;'></div></u></font></center></td>
+     <td><div id="graph"></div></td>
+		 </tr></tbody></table></td>
+</table>
+<div id="botsell">
+  <input type="submit" class="button-sellnow" name="sellnow" value="ขาย 😠" onclick="sell()"></div>
+<div id="botgo"><input type="submit" name="buy" class="button-buy" value="Run 0.5% 🚀" onclick="buy()"></div>
+<table><td>
+    </td></table><hr>
+
+		</center>
+    <script>
+function cryptoSave() {
+localStorage.setItem('symbol_backtest0.5', document.getElementById("NameCoin").value)
+setTimeout(function () { location.reload(1); }, 4000);
+}
+document.getElementById("botsell").style.display = "none"
+document.getElementById("botgo").style.display = "none"
+
+if (localStorage.getItem('symbol_backtest0.5') != null){
+  document.getElementById("botgo").style.display = "inline"
+}
+
+function buy() {
+  localStorage.setItem('Average_backtest0.5', 0)
+  localStorage.setItem('Executed_backtest0.5', 0)
+  localStorage.setItem('Total_backtest0.5', 0)
+  localStorage.setItem('Average_backtest0.5', document.getElementById("pricenow").innerHTML)
+  localStorage.setItem('Executed_backtest0.5', (1000/localStorage.getItem("Average_backtest0.5")).toFixed(7))
+  localStorage.setItem('Total_backtest0.5', 1000)
+  document.body.style.backgroundColor = "#1A1C1D"
+  window.location.reload()
+}
+
+function sell() {
+  localStorage.setItem('Average_backtest0.5', 0)
+  localStorage.setItem('Executed_backtest0.5', 0)
+  localStorage.setItem('Total_backtest0.5', 0)
+  document.getElementById('wallet1').innerHTML = 'คงเหลือ: ' + (1000 + Number(document.getElementById("realprofit").innerHTML)) + ' usd'
+  document.getElementById("botsell").style.display = "none"
+  document.getElementById("realprofit").style.display = "none"
+  document.getElementById("pricenow").innerHTML = 0
+  document.getElementById("percent").innerHTML = '0%'
+  document.getElementById("average").innerHTML = 0
+  document.getElementById("executed").innerHTML = 0
+  document.getElementById("total").innerHTML = 0
+  document.getElementById("botgo").style.display = "inline"
+}
+
+symbol=localStorage.getItem('symbol_backtest0.5').toUpperCase() 
+average = Number(localStorage.getItem("Average_backtest0.5"))
+executed = Number(localStorage.getItem("Executed_backtest0.5"))
+total = Number(localStorage.getItem("Total_backtest0.5"))
+
+if (total == 0){
+wallet1 = 1000
+} else if (total != 0){
+  wallet1 = 0
+}
+
+if (average > 0 || executed > 0 || total > 0){
+  document.getElementById("botgo").style.display = "none"
+  document.getElementById("botsell").style.display = "inline"
+}
+
+document.getElementById('wallet1').innerHTML = 'เงินสด: ' + wallet1 + ' usd'
+document.getElementById('symbol').innerHTML = "<a href='https://www.tradingview.com/chart/?symbol=BINANCE%3A"+symbol+"BUSD&interval=15' target='_blank'>"+symbol+"</a>"
+document.getElementById('average').innerHTML = average
+document.getElementById('executed').innerHTML = executed
+document.getElementById('total').innerHTML = total.toFixed(2)
+document.getElementById("NameCoin").value=symbol
+
+  if (wallet1 < total){
+  document.getElementById("botsell").style.display = "inline"
+  document.getElementById("botgo").style.display = "none"
+ }
+
+///////////ดึง API ราคา Real time
+let ws = new WebSocket("wss://stream.binance.com:9443/ws/" + (symbol).toLowerCase() + "busd"  + "@ticker")
+let stockPriceElement = document.getElementById('pricenow')
+let lastPrice = null;
+
+ws.onmessage = (event) => {
+    let stockObject = JSON.parse(event.data)
+    let price  = parseFloat(stockObject.b)
+    stockPriceElement.innerText = price
+    stockPriceElement.style.color = !lastPrice || lastPrice === price ? '#37B856' : price > lastPrice ? '#6CF109' : 'red'
+	    lastPrice = price
+
+      now = lastPrice*executed
+      RealTimeProfit = now - total
+      percent = ((RealTimeProfit*100)/total).toFixed(1)
+      winner = 1005/executed
+
+      if (RealTimeProfit > 0){
+        document.getElementById("realprofit").innerHTML = RealTimeProfit.toFixed(2)
+        document.getElementById("percentWhat").innerHTML = 'กำไร'
+        document.getElementById("percent").innerHTML = '<font color="green">'+percent + '%</font>'
+        document.getElementById("graph").innerHTML = "<img src='https://nomics.com/images/sparkline/markets/binance-fu_"+ symbol +"USDT-15m.svg'>"
+        document.getElementById("colorTD").style.backgroundColor = 'ForestGreen'
+      } else {
+        document.getElementById("realprofit").innerHTML = RealTimeProfit.toFixed(2)
+        document.getElementById("percentWhat").innerHTML = 'ขาดทุน'
+        document.getElementById("percent").innerHTML = '<font color="red">'+ percent + '%</font>'
+        document.getElementById("colorTD").style.backgroundColor = 'FireBrick'
+      }
+
+      if (lastPrice >= winner){
+      document.body.style.backgroundColor = "darkgreen"
+      localStorage.setItem('Average_backtest0.5', 0)
+      localStorage.setItem('Total_backtest0.5', 0)
+      document.getElementById('wallet1').innerHTML = 'ชนะตลาดแล้ว: ' + (1000 + Number(winner*executed)) + ' usd'
+      document.getElementById("botsell").style.display = "none"
+      document.getElementById("realprofit").style.display = "none"
+      document.getElementById("pricenow").innerHTML = 0
+      document.getElementById("percent").innerHTML = '0%'
+      document.getElementById("average").innerHTML = 0
+      document.getElementById("total").innerHTML = 0
+      document.getElementById("botgo").style.display = "inline"
+      }
+
+     }
+
+</script>
+</body>
+</html>
