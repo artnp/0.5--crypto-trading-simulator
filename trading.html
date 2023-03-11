@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="index.css">
 </head>
 <script src="jquery.min.js"></script>
-<body style="background-color:#1A1C1D;">
+<body style="background-color:#000000;">
 <center>
 <h5><div id="wallet1"></div></h5>
   <table>
@@ -35,7 +35,7 @@
   <input type="submit" class="button-sellnow" name="sellnow" value="ขาย 😠" onclick="sell()"></div>
 <div id="botgo"><input type="submit" name="buy" class="button-buy" value="Run 0.5% 🚀" onclick="buy()"></div>
 <table><td>
-    </td></table><hr>
+    </td></table>
 
 		</center>
     <script>
@@ -125,7 +125,7 @@ ws.onmessage = (event) => {
         document.getElementById("realprofit").innerHTML = RealTimeProfit.toFixed(2)
         document.getElementById("percentWhat").innerHTML = 'กำไร'
         document.getElementById("percent").innerHTML = '<font color="green">'+percent + '%</font>'
-        document.getElementById("graph").innerHTML = "<img src='https://nomics.com/images/sparkline/markets/binance-fu_"+ symbol +"USDT-15m.svg'>"
+        document.getElementById("graph").innerHTML = "<img src='https://nomics.com/images/sparkline/markets/binance-fu_"+ symbol +"USDT-1h.svg'>"
         document.getElementById("colorTD").style.backgroundColor = 'ForestGreen'
       } else {
         document.getElementById("realprofit").innerHTML = RealTimeProfit.toFixed(2)
@@ -138,7 +138,7 @@ ws.onmessage = (event) => {
       document.body.style.backgroundColor = "darkgreen"
       localStorage.setItem('Average_backtest0.5', 0)
       localStorage.setItem('Total_backtest0.5', 0)
-      document.getElementById('wallet1').innerHTML = 'ชนะตลาดแล้ว: ' + (1000 + Number(winner*executed)) + ' usd'
+      document.getElementById('wallet1').innerHTML = 'ชนะตลาดแล้ว: ' + (Number(winner*executed)) + ' usd'
       document.getElementById("botsell").style.display = "none"
       document.getElementById("realprofit").style.display = "none"
       document.getElementById("pricenow").innerHTML = 0
